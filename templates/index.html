@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+	
+<head>
+		<meta charset="utf-8">
+		<title>Swipe – The Simplest Chat Platform</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<meta name="description" content="#">
+		<!-- Bootstrap core CSS -->
+		<link href="{{ url_for('static',filename='dist/css/lib/bootstrap.min.css') }}" type="text/css" rel="stylesheet">
+		<!-- Swipe core CSS -->
+		<link href="{{ url_for('static',filename='dist/css/swipe.min.css') }}" type="text/css" rel="stylesheet">
+		<!-- Favicon -->
+		<link href="{{ url_for('static',filename='dist/img/favicon.png') }}" type="image/png" rel="icon">
+	</head>
+	<body>
+		<!-- Layout -->
+		<div class="layout">
+			<!-- Start of Navigation -->
+			<nav class="navigation">
+				<div class="container">
+					<ul class="nav" role="tablist">
+						<li><a href="#conversations" class="active" data-toggle="tab" role="tab" aria-controls="conversations" aria-selected="true"><i data-eva="message-square" data-eva-animation="pulse"></i></a></li>
+						<li><a href="#friends" data-toggle="tab" role="tab" aria-controls="friends" aria-selected="false"><i data-eva="people" data-eva-animation="pulse"></i></a></li>
+						<li><a href="#settings" data-toggle="tab" role="tab" aria-controls="settings" aria-selected="false"><i data-eva="settings" data-eva-animation="pulse"></i></a></li>
+						<li><button type="button" class="btn"><img src="{{ url_for('static',filename='user_image') }}/{{current_user.image}}" alt="avatar"><i data-eva="radio-button-on"></i></button></li>
+					</ul>
+				</div>
+			</nav>
+			<!-- End of Navigation -->
+			<!-- Start of Sidebar -->
+			<div class="sidebar">
+				<div class="container">
+					<div class="tab-content">
+						<!-- Start of Discussions -->
+						<div class="tab-pane fade show active" id="conversations" role="tabpanel">
+							<div class="top">
+								<form>
+									<input type="search" class="form-control" placeholder="Search">
+									<button type="submit" class="btn prepend"><i data-eva="search"></i></button>
+								</form>
+								<ul class="nav" role="tablist">
+									<li><a href="#direct" class="filter-btn active" data-toggle="tab" data-filter="direct">Direct</a></li>
+									<li><a href="#groups" class="filter-btn" data-toggle="tab" data-filter="groups">Groups</a></li>
+								</ul>
+							</div>
+							<div class="middle">
+								<h4>Discussions</h4>
+								<button type="button" class="btn round" data-toggle="modal" data-target="#compose"><i data-eva="edit-2"></i></button>
+								<hr>
+								<ul class="nav discussions" role="tablist">
+									{% for user in users %}
+									<li>
+										<a href="#chat_{{user.id}}" class="filter direct" data-chat="open" data-toggle="tab" role="tab" aria-controls="chat_{{user.id}}" aria-selected="false" id="{{user.id}}" onclick="chatId(this.id)">
+											<div class="status offline" id="user_{{user.id}}"><img src="{{ url_for('static',filename='user_image') }}/{{user.image}}" alt="avatar"><i data-eva="radio-button-on"></i></div>
+											<div class="content">
+												<div class="headline">
+													<h5>{{user.username}}</h5>
+													<span>Today</span>
+												</div>
+												<p>Please review and sign the binding agreement.</p>
+											</div>
+										</a>
+									</li>
+									<!-- <li>
+										<a href="#chat_{{user.id}}" class="filter groups" data-chat="open" data-toggle="tab" role="tab" aria-controls="chat_{{user.id}}" aria-selected="false">
+											<div class="content">
+												<div class="headline">
+													<img src="dist/img/avatars/avatar-group-1.jpg" alt="avatar">
+													<h5>The Musketeers</h5>
+													<span>Today</span>
+												</div>
+												<p>Please review and sign the binding agreement.</p>
+											</div>
+										</a>
+									</li> -->
+									{% endfor %}									
+								</ul>
+							</div>
+						</div>
+						<!-- End of Discussions -->
+						<!-- Start of Friends -->
+						<div class="tab-pane fade" id="friends" role="tabpanel">
+							<div class="top">
+								<form>
+									<input type="search" class="form-control" placeholder="Search">
+									<button type="submit" class="btn prepend"><i data-eva="search"></i></button>
+								</form>
+							</div>
+							<div class="middle">
+								<h4>Friends</h4>
+								<hr>
+								<ul class="users">
+									{% for user in users%}
+									<li>
+										<a id="{{user.id}}" onclick="chatId(this.id)">
+											<div id="user_{{user.id}}" class="status offline"><img src="{{ url_for('static',filename='user_image') }}/{{user.image}}" alt="avatar"><i data-eva="radio-button-on"></i></div>
+											<div class="content">
+												<h5>{{ user.username}} </h5>
+												<span>{{ user.phone }}</span>
+											</div>
+											<div class="icon"><i data-eva="person"></i></div>
+										</a>
+									</li>
+									{% endfor %}
+								</ul>
+							</div>
+						</div>
+						<!-- End of Friends -->
+						<!-- Start of Settings -->
+						<div class="settings tab-pane fade" id="settings" role="tabpanel">
+							<div class="user">
+								<label>
+									<input type="file">
+									<img src="{{ url_for('static',filename='user_image') }}/{{current_user.image}}" alt="avatar">
+								</label>
+								<div class="content">
+									<h5>{{current_user.username}}</h5>
+									<span>{{ current_user.phone }}</span>
+								</div>
+							</div>
+							<h4>Settings</h4>
+							<ul id="preferences">
+								<!-- Start of Account -->
+								<li>
+									<a href="#" class="headline" data-toggle="collapse" aria-expanded="false" data-target="#account" aria-controls="account">
+										<div class="title">
+											<h5>Account</h5>
+											<p>Update your profile details</p>
+										</div>
+										<i data-eva="arrow-ios-forward"></i>
+										<i data-eva="arrow-ios-downward"></i>
+									</a>
+									<div class="content collapse" id="account" data-parent="#preferences">
+										<div class="inside">
+											<form class="account">
+												<div class="form-group">
+													<label>User Name</label>
+													<input type="text" class="form-control" placeholder="Enter your name" value="{{current_user.username}}">
+												</div>
+												<div class="form-group">
+													<label>Email Address</label>
+													<input type="email" class="form-control" placeholder="Enter your email address" value="{{current_user.email}}">
+												</div>
+												<div class="form-group">
+													<label>Phone Number</label>
+													<input type="text" class="form-control" placeholder="Enter your phone number" value="{{current_user.phone}}">
+												</div>
+												<div class="form-group">
+													<label>Image</label>
+													<input type="file" class="form-control">
+												</div>
+												<button type="submit" class="btn primary">Save settings</button>
+											</form>
+										</div>
+									</div>
+								</li>
+								<!-- End of Account -->
+								<!-- Start of Change Password -->
+								<li>
+									<a href="#" class="headline" data-toggle="collapse" aria-expanded="false" data-target="#change_pass" aria-controls="change_pass">
+										<div class="title">
+											<h5>Change Password</h5>
+											<p>Change your password</p>
+										</div>
+										<i data-eva="arrow-ios-forward"></i>
+										<i data-eva="arrow-ios-downward"></i>
+									</a>
+									<div class="content collapse" id="change_pass" data-parent="#preferences">
+										<div class="inside">
+											<form class="change_password">
+												<div class="form-group">
+													<label>Old Password</label>
+													<input type="password" class="form-control" placeholder="Enter your current password">
+												</div>
+												<div class="form-group">
+													<label>New Password</label>
+													<input type="password" class="form-control" placeholder="Enter your new password">
+												</div>
+												<button type="submit" class="btn primary">Save settings</button>
+											</form>
+										</div>
+									</div>
+								</li>
+								<!-- End of Change Password -->
+							</ul>
+						</div>
+						<!-- End of Settings -->
+					</div>
+				</div>
+			</div>
+			<!-- End of Sidebar -->
+			<!-- Start of Chat -->
+			<div class="chat">
+				<div class="tab-content">
+					<!-- Start of Chat Room -->
+					{% for user in users %}
+					<div class="tab-pane fade show active" id="chat_{{user.id}}" role="tabpanel">
+						<div class="item">
+							<div class="content">
+								<div class="container">
+									<div class="top">
+										<div class="headline">
+											<img src="{{ url_for('static',filename='user_image') }}/{{user.image}}" alt="avatar">
+											<div class="content">
+												<h5>{{user.username}}</h5>
+												<span>Away</span>
+											</div>
+										</div>
+										<ul>
+											<li><button type="button" class="btn"><i data-eva="video" data-eva-animation="pulse"></i></button></li>
+											<li><button type="button" class="btn"><i data-eva="phone" data-eva-animation="pulse"></i></button></li>
+										</ul>
+									</div>
+								</div>
+								<div class="middle" id="scroll">
+									<!-- <div class="container">
+										<ul>
+											<li>
+												<img src="dist/img/avatars/avatar-male-3.jpg" alt="avatar">
+												<div class="content">
+													<div class="message">
+														<div class="bubble">
+															<p>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
+														</div>
+													</div>
+													<span>07:30am</span>
+												</div>
+											</li>
+											<li>
+												<div class="content">
+													<div class="message">
+														<div class="bubble">
+															<p>Many desktop publishing packages.</p>
+														</div>
+													</div>
+													<span>11:56am</span>
+												</div>
+											</li>
+											<li>
+												<img src="dist/img/avatars/avatar-male-3.jpg" alt="avatar">
+												<div class="content">
+													<div class="message">
+														<div class="bubble">
+															<div class="attachment">
+																<a href="#" class="round"><i data-eva="file-text"></i></a>
+																<div class="meta">
+																	<a href="#"><h5>build-plugins.js</h5></a>
+																	<span>3kb</span>
+																</div>
+															</div>
+														</div>
+													</div>
+													<span>01:03pm</span>
+												</div>
+											</li>
+										</ul>
+									</div> -->
+								</div>
+								<div class="container">
+									<div class="bottom">
+										<form>
+											<textarea class="form-control" placeholder="Type message..." rows="1" name="message" id="message_{{user.id}}"></textarea>
+											<button type="button" class="btn prepend" onclick="chatFunction()"><i data-eva="paper-plane"></i></button>
+										</form>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+					{% endfor %}
+					<!-- End of Chat Room -->
+				</div>
+			</div>
+			<!-- End of Chat -->
+			<!-- Start of Compose -->
+			<div class="modal fade" id="compose" tabindex="-1" role="dialog" aria-labelledby="compose" aria-hidden="true">
+				<div class="modal-dialog modal-dialog-centered" role="document">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5>Compose</h5>
+							<button type="button" class="btn round" data-dismiss="modal" aria-label="Close">
+								<i data-eva="close"></i>
+							</button>
+						</div>
+						<div class="modal-body">
+							<ul class="nav" role="tablist">
+								<li><a href="#details" class="active" data-toggle="tab" role="tab" aria-controls="details" aria-selected="true">Details</a></li>
+								<li><a href="#participants" data-toggle="tab" role="tab" aria-controls="participants" aria-selected="false">Participants</a></li>
+							</ul>
+							<div class="tab-content">
+								<!-- Start of Details -->
+								<div class="details tab-pane fade show active" id="details" role="tabpanel">
+									<form>
+										<div class="form-group">
+											<label>Title</label>
+											<input type="text" class="form-control" placeholder="What's the topic?">
+										</div>
+										<div class="form-group">
+											<label>Message</label>
+											<textarea class="form-control" placeholder="Hmm, are you friendly?"></textarea>
+										</div>
+									</form>
+								</div>
+								<!-- End of Details -->
+								<!-- Start of Participants -->
+								<div class="participants tab-pane fade" id="participants" role="tabpanel">
+									<div class="search">
+										<form>
+											<input type="search" class="form-control" placeholder="Search">
+											<button type="submit" class="btn prepend"><i data-eva="search"></i></button>
+										</form>
+									</div>
+									<h4>Users</h4>
+									<hr>
+									<ul class="users">
+										<li>
+											<div class="status online"><img src="dist/img/avatars/avatar-male-1.jpg" alt="avatar"><i data-eva="radio-button-on"></i></div>
+											<div class="content">
+												<h5>Ham Chuwon</h5>
+												<span>Florida, US</span>
+											</div>
+											<div class="custom-control custom-checkbox">
+												<input type="checkbox" class="custom-control-input" id="user1">
+												<label class="custom-control-label" for="user1"></label>
+											</div>
+										</li>
+										<li>
+											<div class="status offline"><img src="dist/img/avatars/avatar-male-2.jpg" alt="avatar"><i data-eva="radio-button-on"></i></div>
+											<div class="content">
+												<h5>Quincy Hensen</h5>
+												<span>Shanghai, China</span>
+											</div>
+											<div class="custom-control custom-checkbox">
+												<input type="checkbox" class="custom-control-input" id="user2">
+												<label class="custom-control-label" for="user2"></label>
+											</div>
+										</li>
+									</ul>
+								</div>
+								<!-- End of Participants -->
+							</div>
+						</div>
+						<div class="modal-footer">
+							<button type="submit" class="btn primary">Compose</button>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- End of Compose -->
+		</div>
+		<!-- Layout -->
+		<script src="{{ url_for('static',filename='dist/js/vendor/jquery-slim.min.js') }}"></script>
+		<script src="{{ url_for('static',filename='dist/js/vendor/popper.min.js') }}"></script>
+		<script src="{{ url_for('static',filename='dist/js/vendor/feather.min.js') }}"></script>
+		<script src="{{ url_for('static',filename='dist/js/vendor/eva.min.js') }}"></script>
+		<script src="{{ url_for('static',filename='dist/js/vendor/bootstrap.min.js') }}"></script>
+		<script src="{{ url_for('static',filename='dist/js/swipe.min.js') }}"></script>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
+		<script type="text/javascript">
+			var current_user_id = {{ current_user.id }}
+			var socket = io.connect('http://' + document.domain + ':' + location.port + '/index');
+			var current_chat_id;
+			socket.on('my response connect', function (msg) {
+				console.log(msg)
+				for (let i = 0; i < msg.connect_id.length; i++) {
+					if (msg.connect_id[i] != current_user_id) {
+						var id = 'user_' + msg.connect_id[i];
+						document.getElementById(id).classList.remove("status", "offline") ;
+						document.getElementById(id).classList.add("status", "online") ;
+					}
+				}
+			});
+
+			socket.on('my response disconnect', function (msg) {
+				console.log(msg);
+				var id = 'user_' + msg.disconnect_id;
+				document.getElementById(id).classList.remove("status", "online") ;
+				document.getElementById(id).classList.add("status", "offline") ;
+			});
+
+			function chatId(id) {
+            current_chat_id = id
+			console.log(current_chat_id)
+            socket.emit('my event chat history', {
+                	receiver : current_chat_id,
+                	sender : current_user_id,
+            	})
+			}
+			
+			function chatFunction() {
+				id = 'message_' + current_chat_id;
+            	message = document.getElementById(id).value;
+
+				var currentDate = new Date();
+				var time = currentDate.toISOString().split('T')[0]+' '+currentDate.toTimeString().split(' ')[0];
+				if (message != null && message != "") {
+						socket.emit('my event chat', {
+						message : message,
+						receiver : current_chat_id,
+						sender : current_user_id,
+						time : time,
+					});
+	
+					var displayDate = currentDate.getHours() + ":" + currentDate.getMinutes();
+					
+					var html = '';
+					html += '<li style="justify-content: flex-end; text-align: right">';
+					html += '<div class="content"><div class="message"><div class="bubble">';
+					html += '<p>' + message + '</p>';
+					html += '</div></div>'
+					html += '<span>'+ displayDate +'</span>'
+					html += '</div></li>'
+					
+					var chat_id = "chat_" + current_chat_id;
+					chat = document.getElementById(chat_id).getElementsByClassName("middle")[0].getElementsByClassName("container")[0].getElementsByTagName("ul")[0];
+					// console.log(chat);
+					chat.innerHTML = chat.innerHTML + html;
+
+					document.getElementById(id).value = "";		
+				}	
+			}
+			
+			function displayChatHistory(chat_id, msg) {
+				const monthNames = ["Jan", "Feb", "March", "April", "May", "June","July", "Aug", "Sept", "Oct", "Nov", "Dec"];
+				// console.log(msg.length);
+				var html = '';
+				html += '<div class="container">';
+				html += '<ul>';
+				for (let index = 0; index < msg.length; index++) {
+					var JSDate = new Date(msg[index].datetime);
+					// console.log(JSDate);
+					var currentDate = new Date();
+					// console.log(currentDate);
+					if ((currentDate - JSDate) > 86400000) {
+						var displayDate = monthNames[JSDate.getMonth()] + " " + JSDate.getDate();
+						// console.log(displayDate);
+					} else {
+						var displayDate = JSDate.getHours() + ":" + JSDate.getMinutes(); 
+					}
+
+					if (msg[index].user_2 == current_user_id) {
+						// console.log(current_user_id);
+						html += '<li style="justify-content: flex-end; text-align: right">';
+						html += '<div class="content"><div class="message"><div class="bubble">';
+						html += '<p>' + msg[index].content + '</p>';
+						html += '</div></div>'
+						html += '<span>'+ displayDate +'</span>'
+						html += '</div></li>'
+					}
+					else {
+						html += '<li style="justify-content: flex-start; text-align: left">';
+						{% for user in users %}
+							// console.log( msg[index].user_1 )
+							if (msg[index].user_2 == {{ user.id }}) {
+								var imgSrc = "{{ url_for('static',filename='user_image') }}/{{user.image}}"
+								html += '<img src='+ imgSrc +' alt="avatar" style="margin-right: 15px; margin-left: 0; order: 1">';
+							}
+						{% endfor %}
+						html += '<div class="content"><div class="message"><div class="bubble">';
+						html += '<p>' + msg[index].content + '</p>';
+						html += '</div></div>'
+						html += '<span>'+ displayDate +'</span>'
+						html += '</div></li>'
+					}	
+				}
+				html += '</ul></div>';
+
+				chat = document.getElementById(chat_id).getElementsByClassName("middle")[0];
+				// console.log(chat);
+				chat.innerHTML = html;
+			}
+
+			socket.on('my response chat', function(msg) {
+            	console.log(msg);
+				if (msg.sender == current_chat_id) {
+					var JSDate = new Date(msg.time);
+					var currentDate = new Date();
+					if ((currentDate - JSDate) > 86400000) {
+						var displayDate = monthNames[JSDate.getMonth()] + " " + JSDate.getDate();
+					} else {
+						var displayDate = JSDate.getHours() + ":" + JSDate.getMinutes(); 
+					}
+
+					var html = '';
+					html += '<li style="justify-content: flex-start; text-align: left">';
+					{% for user in users %}
+						// console.log( msg[index].user_1 )
+						if (msg.sender == {{ user.id }}) {
+							var imgSrc = "{{ url_for('static',filename='user_image') }}/{{user.image}}"
+							html += '<img src='+ imgSrc +' alt="avatar" style="margin-right: 15px; margin-left: 0; order: 1">';
+						}
+					{% endfor %}
+					html += '<div class="content"><div class="message"><div class="bubble">';
+					html += '<p>' + msg.message + '</p>';
+					html += '</div></div>'
+					html += '<span>'+ displayDate +'</span>'
+					html += '</div></li>'
+
+					var chat_id = "chat_" + current_chat_id;
+					chat = document.getElementById(chat_id).getElementsByClassName("middle")[0].getElementsByClassName("container")[0].getElementsByTagName("ul")[0];
+					// console.log(chat);
+					chat.innerHTML = chat.innerHTML + html;
+				}
+        	})
+
+        	socket.on('my response chat history', function(msg) {
+            	console.log(msg);
+				var chat_id = "chat_" + current_chat_id;
+				displayChatHistory(chat_id, msg);
+        	})
+		</script>
+	</body>
+</html>																																																										

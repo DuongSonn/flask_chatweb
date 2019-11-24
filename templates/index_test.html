@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        td,
+        th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #dddddd;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>User list</h1>
+    <h2>{{ current_user.username }}</h2>
+    <table>
+        <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Status</th>
+            <th>Image</th>
+            <th></th>
+        </tr>
+        {% for user in users%}
+        <tr>
+            <td>{{user.id}}</td>
+            <td>{{user.username}}</td>
+            <td>{{user.email}}</td>
+            <td>{{user.phone}}</td>
+            <td id="user_{{user.id}}">false</td>
+            <td>
+                <img src="{{ url_for('static',filename='user_image') }}/{{user.image}}" alt="">
+            </td>
+            <td><p id="{{user.id}}" onclick="myFunction(this.id)">Connect</p></td>
+        </tr>
+        {% endfor %}
+    </table>
+    <form>
+        <input type="text" name="message" id="message">
+        <button type="button" onclick="myFunction2()">Send</button>
+    </form>
+
+    <form action=""  enctype="multipart/form-data" method="POST">
+        <input type="file" name="file">
+        <button>Send</button>
+    </form>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
+    <script type="text/javascript">
+        var current_user_id = {{ current_user.id }}
+        var socket = io.connect('http://' + document.domain + ':' + location.port + '/index');
+        var current_chat_id;
+        socket.on('my response connect', function (msg) {
+            console.log(msg)
+            for (let i = 0; i < msg.connect_id.length; i++) {
+                var id = 'user_' + msg.connect_id[i];
+                console.log(id);
+                document.getElementById(id).innerHTML = "true";
+            }
+        });
+
+        socket.on('my response disconnect', function (msg) {
+            console.log(msg);
+            var id = 'user_' + msg.disconnect_id;
+            document.getElementById(id).innerHTML = 'false';
+        });
+
+        function myFunction(id) {
+            current_chat_id = id
+            console.log(current_chat_id)
+            socket.emit('my event chat history', {
+                receiver : current_chat_id,
+                sender : current_user_id,
+            })
+        }
+
+        function myFunction2() {
+            message = document.getElementById('message').value;
+            socket.emit('my event chat', {
+                message : message,
+                receiver : current_chat_id,
+                sender : current_user_id,
+            })
+        }
+
+        socket.on('my response chat', function(msg) {
+            console.log(msg);
+        })
+
+        socket.on('my response chat history', function(msg) {
+            console.log(msg);
+        })
+    </script>
+</body>
+
+</html>
