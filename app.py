@@ -1,4 +1,4 @@
-from flask import Flask,render_template,request,redirect,session,jsonify,url_for
+from flask import Flask,render_template,request,redirect,session,jsonify,url_for,current_app,send_from_directory
 from flask_sqlalchemy import SQLAlchemy 
 from flask_bcrypt import Bcrypt
 from flask_login import login_user,LoginManager,UserMixin,current_user,login_required
@@ -12,6 +12,7 @@ import redis
 import re
 import json
 import os
+import uuid
 
 userConnect = []
 userRoom = []
@@ -37,10 +38,11 @@ socketio = SocketIO(app)
 
 #upload file
 dir_path = os.path.dirname(os.path.realpath(__file__))
-UPLOAD_FOLDER = dir_path + '/user_image'
+UPLOAD_FOLDER = os.path.join(dir_path, 'static/user_image')
 ALLOWED_EXTENSIONS = {'txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
+app.config['FILEDIR'] = 'static/_files/'
 #model User
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key =True)
@@ -57,10 +59,11 @@ class User(db.Model, UserMixin):
 #model Message
 class Message(db.Model):
     id = db.Column(db.Integer, primary_key =True)
-    user_1 = db.Column(db.Integer, db.ForeignKey('user.id'), nullable = False)
-    user_2 = db.Column(db.Integer, db.ForeignKey('user.id'), nullable = False)
+    user_1 = db.Column(db.Integer, db.ForeignKey('user.id'), nullable = False) #reciever
+    user_2 = db.Column(db.Integer, db.ForeignKey('user.id'), nullable = False) #sender
     content = db.Column(db.String(500), nullable = False)
     datetime = db.Column(db.DateTime, nullable = False)
+    message_type = db.Column(db.String(20), nullable = False)
 
     def __repr__(self):
         return '<Task %r>' %self.id
@@ -171,21 +174,54 @@ def signup_index():
 @login_required
 def index():
     if request.method == 'POST':
-        if 'file' not in request.files:
-            flash('No file part')
-            return redirect(request.url)
-        file = request.files['file']
-        if file.filename == '':
-            flash('No selected file')
-            return redirect(request.url)
-        if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
-            print(filename)
-            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            return redirect(url_for('index',filename=filename)) 
+        if request.form["btn"]=="Save":
+            email = request.form['email']
+            username = request.form['username']
+            phone = request.form['phone']
+
+            user = User.query.filter_by(username=current_user.username).first()
+
+            if (phone != "" and phone != current_user.phone):
+                user.phone = phone
+            if (email != "" and email != current_user.email):
+                user.email = email
+            if (username != "" and username != current_user.username):
+                user.username = username
+            # if 'file' not in request.files:
+            #     # flash('No file part')
+            #     return redirect(request.url)
+            file = request.files['file']
+            if file.filename == '':
+                # flash('No selected file')
+                return redirect(request.url)
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                # print(app.config['UPLOAD_FOLDER'])
+                user.image = filename
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                # return redirect(url_for('index',filename=filename))
+            db.session.commit()
+            return redirect(url_for('index'))
+        else :
+            old_password = request.form['old_password']
+            new_password = request.form['new_password']
+
+            if (old_password != "" and new_password != ""):
+                if (bcrypt.check_password_hash(current_user.password, old_password)):
+                    user.password = bcrypt.generate_password_hash(new_password)
+                    db.session.commit()
+                    return redirect(url_for('index'))
+                else :
+                    return redirect(request.url)
+            else :
+                return redirect(request.url)
     else :
+        sql = text('select m.* from message m where m.id in (select max(m.id) as max_id from message m group by least(m.user_1, m.user_2), greatest(m.user_1, m.user_2));')
+        msgs = db.engine.execute(sql).fetchall()
         users = User.query.filter(User.email != current_user.email).all()
-        return render_template("index.html", users = users, current_user = current_user)
+        sql_file = text('select * from message m where user_1 = :x or user_2 = :x and message_type = "file"')
+        msgs_file = db.engine.execute(sql_file, x=current_user.id).fetchall()
+        return render_template("index.html", users = users, current_user = current_user, msgs = msgs, msgs_file = msgs_file)
     
 @socketio.on('connect', namespace = '/index')
 def on_connect():
@@ -224,7 +260,7 @@ def on_disconnect():
 @socketio.on('my event chat', namespace = '/index')
 def on_message(msg):
     if current_user.is_authenticated :
-        message = Message(user_1 = int(msg['receiver']), user_2 = int(msg['sender']), content = msg['message'], datetime= msg['time'])
+        message = Message(user_1 = int(msg['receiver']), user_2 = int(msg['sender']), content = msg['message'], datetime= msg['time'], message_type = msg['type'])
         db.session.add(message)
         db.session.commit()
         for i,user in enumerate(userConnect):
@@ -234,7 +270,7 @@ def on_message(msg):
 @socketio.on('my event chat history', namespace = '/index')
 def on_message(msg):
     if current_user.is_authenticated :
-        sql = text('select * from message WHERE ( user_1 = :x AND user_2 = :y ) OR ( user_1 = :y AND user_2 = :x ) AND content IS NOT NULL ORDER BY datetime LIMIT 10')
+        sql = text('select * from (select * from message WHERE ( user_1 = :x AND user_2 = :y ) OR ( user_1 = :y AND user_2 = :x ) AND content IS NOT NULL ORDER BY ID desc LIMIT 10 ) as test order by id asc')
         msgs = db.engine.execute(sql , x=int(msg['receiver']), y=msg['sender']).fetchall()
         msg_schema = MesssageSchema(many=True)
         json = msg_schema.dump(msgs)
@@ -242,6 +278,51 @@ def on_message(msg):
             if (msg['sender'] == user):
                 emit('my response chat history', json, room = userRoom[i])
 
+@socketio.on('start-transfer', namespace='/index')
+def start_transfer(sender, receiver, filename, size):
+    folder = str(sender) + "_" + receiver
+    directory  = os.path.join(current_app.config['FILEDIR'], folder)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    """Process an upload request from the client."""
+    _, ext = os.path.splitext(filename)
+    if ext in ['.exe', '.bin', '.js', '.sh', '.py', '.php']:
+        return False  # reject the upload
+
+    id = uuid.uuid4().hex  # server-side filename
+    
+    with open(os.path.join(directory, _ + '.json'), 'wt') as f:
+        json.dump({'filename': filename, 'size': size}, f)
+    with open(os.path.join(directory, _ + ext), 'wb') as f:
+        pass
+    return _ + ext  # allow the upload
+
+
+@socketio.on('write-chunk', namespace='/index')
+def write_chunk(sender, receiver, filename, offset, data):
+    folder = str(sender) + "_" + receiver
+    directory  = os.path.join(current_app.config['FILEDIR'], folder)
+
+    """Write a chunk of data sent by the client."""
+    if not os.path.exists(os.path.join(directory, filename)):
+        return False
+    try:
+        with open(os.path.join(directory, filename), 'r+b') as f:
+            f.seek(offset)
+            f.write(data)
+    except IOError:
+        return False
+    return True
+
+@app.route('/file/<path:filename>', methods=['GET'])
+@login_required
+def download(filename):
+    directoryArr = filename.split('/')
+    directory = os.path.join(current_app.config['FILEDIR'], directoryArr[0])
+    if not os.path.exists(os.path.join(directory, directoryArr[1])):
+        return False
+    return send_from_directory(directory=directory, filename=directoryArr[1], as_attachment=True)
 
 #run
 if __name__ == "__main__":

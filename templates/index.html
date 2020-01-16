@@ -34,67 +34,24 @@
 					<div class="tab-content">
 						<!-- Start of Discussions -->
 						<div class="tab-pane fade show active" id="conversations" role="tabpanel">
-							<div class="top">
-								<form>
-									<input type="search" class="form-control" placeholder="Search">
-									<button type="submit" class="btn prepend"><i data-eva="search"></i></button>
-								</form>
-								<ul class="nav" role="tablist">
-									<li><a href="#direct" class="filter-btn active" data-toggle="tab" data-filter="direct">Direct</a></li>
-									<li><a href="#groups" class="filter-btn" data-toggle="tab" data-filter="groups">Groups</a></li>
-								</ul>
-							</div>
 							<div class="middle">
 								<h4>Discussions</h4>
 								<button type="button" class="btn round" data-toggle="modal" data-target="#compose"><i data-eva="edit-2"></i></button>
 								<hr>
-								<ul class="nav discussions" role="tablist">
-									{% for user in users %}
-									<li>
-										<a href="#chat_{{user.id}}" class="filter direct" data-chat="open" data-toggle="tab" role="tab" aria-controls="chat_{{user.id}}" aria-selected="false" id="{{user.id}}" onclick="chatId(this.id)">
-											<div class="status offline" id="user_{{user.id}}"><img src="{{ url_for('static',filename='user_image') }}/{{user.image}}" alt="avatar"><i data-eva="radio-button-on"></i></div>
-											<div class="content">
-												<div class="headline">
-													<h5>{{user.username}}</h5>
-													<span>Today</span>
-												</div>
-												<p>Please review and sign the binding agreement.</p>
-											</div>
-										</a>
-									</li>
-									<!-- <li>
-										<a href="#chat_{{user.id}}" class="filter groups" data-chat="open" data-toggle="tab" role="tab" aria-controls="chat_{{user.id}}" aria-selected="false">
-											<div class="content">
-												<div class="headline">
-													<img src="dist/img/avatars/avatar-group-1.jpg" alt="avatar">
-													<h5>The Musketeers</h5>
-													<span>Today</span>
-												</div>
-												<p>Please review and sign the binding agreement.</p>
-											</div>
-										</a>
-									</li> -->
-									{% endfor %}									
-								</ul>
+								<ul class="nav discussions" role="tablist"></ul>
 							</div>
 						</div>
 						<!-- End of Discussions -->
 						<!-- Start of Friends -->
 						<div class="tab-pane fade" id="friends" role="tabpanel">
-							<div class="top">
-								<form>
-									<input type="search" class="form-control" placeholder="Search">
-									<button type="submit" class="btn prepend"><i data-eva="search"></i></button>
-								</form>
-							</div>
 							<div class="middle">
 								<h4>Friends</h4>
 								<hr>
-								<ul class="users">
+								<ul class="users" role="tablist">
 									{% for user in users%}
 									<li>
-										<a id="{{user.id}}" onclick="chatId(this.id)">
-											<div id="user_{{user.id}}" class="status offline"><img src="{{ url_for('static',filename='user_image') }}/{{user.image}}" alt="avatar"><i data-eva="radio-button-on"></i></div>
+										<a href="#chat_{{user.id}}" class="filter direct" data-chat="open" data-toggle="tab" role="tab" aria-controls="chat_{{user.id}}" aria-selected="false" id="{{user.id}}" onclick="chatId(this.id)">
+											<div class="status offline user_{{user.id}}"><img src="{{ url_for('static',filename='user_image') }}/{{user.image}}" alt="avatar"><i data-eva="radio-button-on"></i></div>
 											<div class="content">
 												<h5>{{ user.username}} </h5>
 												<span>{{ user.phone }}</span>
@@ -133,24 +90,24 @@
 									</a>
 									<div class="content collapse" id="account" data-parent="#preferences">
 										<div class="inside">
-											<form class="account">
+											<form class="account" method="POST" enctype="multipart/form-data">
 												<div class="form-group">
 													<label>User Name</label>
-													<input type="text" class="form-control" placeholder="Enter your name" value="{{current_user.username}}">
+													<input type="text" class="form-control" placeholder="Enter your name" value="{{current_user.username}}" name="username">
 												</div>
 												<div class="form-group">
 													<label>Email Address</label>
-													<input type="email" class="form-control" placeholder="Enter your email address" value="{{current_user.email}}">
+													<input type="email" class="form-control" placeholder="Enter your email address" value="{{current_user.email}}" name="email">
 												</div>
 												<div class="form-group">
 													<label>Phone Number</label>
-													<input type="text" class="form-control" placeholder="Enter your phone number" value="{{current_user.phone}}">
+													<input type="text" class="form-control" placeholder="Enter your phone number" value="{{current_user.phone}}" name="phone">
 												</div>
 												<div class="form-group">
 													<label>Image</label>
-													<input type="file" class="form-control">
+													<input type="file" class="form-control" name="file">
 												</div>
-												<button type="submit" class="btn primary">Save settings</button>
+												<input type="submit" class="btn primary" value="Save" name="btn">Save settings</input>
 											</form>
 										</div>
 									</div>
@@ -168,16 +125,16 @@
 									</a>
 									<div class="content collapse" id="change_pass" data-parent="#preferences">
 										<div class="inside">
-											<form class="change_password">
+											<form class="change_password" method="POST">
 												<div class="form-group">
 													<label>Old Password</label>
-													<input type="password" class="form-control" placeholder="Enter your current password">
+													<input type="password" class="form-control" placeholder="Enter your current password" name="old_password">
 												</div>
 												<div class="form-group">
 													<label>New Password</label>
-													<input type="password" class="form-control" placeholder="Enter your new password">
+													<input type="password" class="form-control" placeholder="Enter your new password" name="new_password">
 												</div>
-												<button type="submit" class="btn primary">Save settings</button>
+												<input type="submit" class="btn primary" value="Change Password" name="btn">Save settings</input>
 											</form>
 										</div>
 									</div>
@@ -194,8 +151,11 @@
 			<div class="chat">
 				<div class="tab-content">
 					<!-- Start of Chat Room -->
+					<div class="tab-pane fade show active" id="" role="tabpanel">
+					</div>
+
 					{% for user in users %}
-					<div class="tab-pane fade show active" id="chat_{{user.id}}" role="tabpanel">
+					<div class="tab-pane fade" id="chat_{{user.id}}" role="tabpanel">
 						<div class="item">
 							<div class="content">
 								<div class="container">
@@ -204,68 +164,56 @@
 											<img src="{{ url_for('static',filename='user_image') }}/{{user.image}}" alt="avatar">
 											<div class="content">
 												<h5>{{user.username}}</h5>
-												<span>Away</span>
+												<span>Offline</span>
 											</div>
 										</div>
 										<ul>
-											<li><button type="button" class="btn"><i data-eva="video" data-eva-animation="pulse"></i></button></li>
-											<li><button type="button" class="btn"><i data-eva="phone" data-eva-animation="pulse"></i></button></li>
+											<li><button type="button" class="btn" data-utility="open"><i data-eva="info" data-eva-animation="pulse"></i></button></li>
 										</ul>
 									</div>
 								</div>
 								<div class="middle" id="scroll">
-									<!-- <div class="container">
+									<div class="container">
 										<ul>
-											<li>
-												<img src="dist/img/avatars/avatar-male-3.jpg" alt="avatar">
-												<div class="content">
-													<div class="message">
-														<div class="bubble">
-															<p>Lorem Ipsum is simply dummy text of the printing and typesetting industry.</p>
-														</div>
-													</div>
-													<span>07:30am</span>
-												</div>
-											</li>
-											<li>
-												<div class="content">
-													<div class="message">
-														<div class="bubble">
-															<p>Many desktop publishing packages.</p>
-														</div>
-													</div>
-													<span>11:56am</span>
-												</div>
-											</li>
-											<li>
-												<img src="dist/img/avatars/avatar-male-3.jpg" alt="avatar">
-												<div class="content">
-													<div class="message">
-														<div class="bubble">
-															<div class="attachment">
-																<a href="#" class="round"><i data-eva="file-text"></i></a>
-																<div class="meta">
-																	<a href="#"><h5>build-plugins.js</h5></a>
-																	<span>3kb</span>
-																</div>
-															</div>
-														</div>
-													</div>
-													<span>01:03pm</span>
-												</div>
-											</li>
 										</ul>
-									</div> -->
+									</div>
 								</div>
 								<div class="container">
-									<div class="bottom">
-										<form>
-											<textarea class="form-control" placeholder="Type message..." rows="1" name="message" id="message_{{user.id}}"></textarea>
-											<button type="button" class="btn prepend" onclick="chatFunction()"><i data-eva="paper-plane"></i></button>
-										</form>
+									<div class="bottom input-group mb-3">
+										<textarea class="form-control" placeholder="Type message..." rows="1" name="message" id="message_{{user.id}}"></textarea>
+										<div class="input-group-append">
+											<button type="button" class="btn prepend" onclick="fileFunction()" style="background: #f5f5f5;"><i data-eva="attach"></i></button>
+											<input type="file" id="get_file_message_{{user.id}}" style="display: none;" onchange="uploadFileFunction()" name="file">
+											<button type="button" class="btn prepend" onclick="chatFunction()" style="background: #f5f5f5;"><i data-eva="paper-plane"></i></button>
+										</div>
 									</div>
 								</div>
 							</div>
+							<!-- Start of Utility -->
+							<div class="utility">
+								<div class="container">
+									<button type="button" class="close" data-utility="open"><i data-eva="close"></i></button>
+									<div class="tab-content">
+										<!-- Start of Files -->
+										<div class="tab-pane active show" id="files" role="tabpanel">
+											<h4>Files</h4>
+											<ul class="files">
+												{% for msg_file in msgs_file  %}
+												{% if (user.id == msg_file.user_1 or user.id == msg_file.user_2) %}
+												<li>
+													<div class="meta">
+														<a href="file/{{current_user.id}}_{{user.id}}/{{msg_file.content}}" onclick="Open(this); return false;"><h5>{{ msg_file.content }}</h5></a>
+													</div>
+												</li>
+												{% endif %}
+												{% endfor %}
+											</ul>
+										</div>
+										<!-- End of Files -->
+									</div>
+								</div>
+							</div>
+							<!-- End of Utility -->
 						</div>
 					</div>
 					{% endfor %}
@@ -273,81 +221,6 @@
 				</div>
 			</div>
 			<!-- End of Chat -->
-			<!-- Start of Compose -->
-			<div class="modal fade" id="compose" tabindex="-1" role="dialog" aria-labelledby="compose" aria-hidden="true">
-				<div class="modal-dialog modal-dialog-centered" role="document">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h5>Compose</h5>
-							<button type="button" class="btn round" data-dismiss="modal" aria-label="Close">
-								<i data-eva="close"></i>
-							</button>
-						</div>
-						<div class="modal-body">
-							<ul class="nav" role="tablist">
-								<li><a href="#details" class="active" data-toggle="tab" role="tab" aria-controls="details" aria-selected="true">Details</a></li>
-								<li><a href="#participants" data-toggle="tab" role="tab" aria-controls="participants" aria-selected="false">Participants</a></li>
-							</ul>
-							<div class="tab-content">
-								<!-- Start of Details -->
-								<div class="details tab-pane fade show active" id="details" role="tabpanel">
-									<form>
-										<div class="form-group">
-											<label>Title</label>
-											<input type="text" class="form-control" placeholder="What's the topic?">
-										</div>
-										<div class="form-group">
-											<label>Message</label>
-											<textarea class="form-control" placeholder="Hmm, are you friendly?"></textarea>
-										</div>
-									</form>
-								</div>
-								<!-- End of Details -->
-								<!-- Start of Participants -->
-								<div class="participants tab-pane fade" id="participants" role="tabpanel">
-									<div class="search">
-										<form>
-											<input type="search" class="form-control" placeholder="Search">
-											<button type="submit" class="btn prepend"><i data-eva="search"></i></button>
-										</form>
-									</div>
-									<h4>Users</h4>
-									<hr>
-									<ul class="users">
-										<li>
-											<div class="status online"><img src="dist/img/avatars/avatar-male-1.jpg" alt="avatar"><i data-eva="radio-button-on"></i></div>
-											<div class="content">
-												<h5>Ham Chuwon</h5>
-												<span>Florida, US</span>
-											</div>
-											<div class="custom-control custom-checkbox">
-												<input type="checkbox" class="custom-control-input" id="user1">
-												<label class="custom-control-label" for="user1"></label>
-											</div>
-										</li>
-										<li>
-											<div class="status offline"><img src="dist/img/avatars/avatar-male-2.jpg" alt="avatar"><i data-eva="radio-button-on"></i></div>
-											<div class="content">
-												<h5>Quincy Hensen</h5>
-												<span>Shanghai, China</span>
-											</div>
-											<div class="custom-control custom-checkbox">
-												<input type="checkbox" class="custom-control-input" id="user2">
-												<label class="custom-control-label" for="user2"></label>
-											</div>
-										</li>
-									</ul>
-								</div>
-								<!-- End of Participants -->
-							</div>
-						</div>
-						<div class="modal-footer">
-							<button type="submit" class="btn primary">Compose</button>
-						</div>
-					</div>
-				</div>
-			</div>
-			<!-- End of Compose -->
 		</div>
 		<!-- Layout -->
 		<script src="{{ url_for('static',filename='dist/js/vendor/jquery-slim.min.js') }}"></script>
@@ -356,30 +229,92 @@
 		<script src="{{ url_for('static',filename='dist/js/vendor/eva.min.js') }}"></script>
 		<script src="{{ url_for('static',filename='dist/js/vendor/bootstrap.min.js') }}"></script>
 		<script src="{{ url_for('static',filename='dist/js/swipe.min.js') }}"></script>
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+		<script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     	<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.7.3/socket.io.min.js"></script>
 		<script type="text/javascript">
+
+			const chunk_size = 64 * 1024;
 			var current_user_id = {{ current_user.id }}
 			var socket = io.connect('http://' + document.domain + ':' + location.port + '/index');
 			var current_chat_id;
+
+			// hiển thị tin nhắn mới nhất khi log in
+			function latestMsg() {
+				const monthNames = ["Jan", "Feb", "March", "April", "May", "June","July", "Aug", "Sept", "Oct", "Nov", "Dec"];
+				var html = '';
+				var divs = document.getElementById('conversations').getElementsByClassName('middle')[0].getElementsByTagName('ul')[0];
+				{% for user in users %}
+					html += '<li id="user_{{user.id}}"><a href="#chat_{{user.id}}" class="filter direct" data-chat="open" data-toggle="tab" role="tab" aria-controls="chat_{{user.id}}" aria-selected="false" id="{{user.id}}" onclick="chatId(this.id)">'
+					var imgSrc = "{{ url_for('static',filename='user_image') }}/{{user.image}}";
+					html += '<div class="status offline user_{{user.id}}"><img src="'+ imgSrc +'" alt="avatar"><i data-eva="radio-button-on"></i></div>';
+					html += '<div class="content">';
+					html += '<div class="headline">';
+					html += '<h5>{{user.username}}</h5>'
+					
+					{% for msg in msgs %}
+						{% if (msg.user_1 == user.id and msg.user_2 == current_user.id) or (msg.user_2 == user.id and msg.user_1 == current_user.id)%}					
+							var SQLDate = '{{ msg.datetime }}'
+							var JSDate = new Date(SQLDate);
+							var currentDate = new Date();
+							if ((currentDate - JSDate) > 86400000) {
+								var displayDate = monthNames[JSDate.getMonth()] + " " + JSDate.getDate();
+							} else {
+								var displayDate = JSDate.getHours() + ":" + JSDate.getMinutes(); 
+							}
+							html +=	'<span>'+ displayDate +'</span>'
+						{% endif %}
+					{% endfor %}	
+
+					html +=	'</div>'
+					{% for msg in msgs %}
+						{% if (msg.user_1 == user.id and msg.user_2 == current_user.id) or (msg.user_2 == user.id and msg.user_1 == current_user.id)%}					
+							html +=	'<p>{{ msg.content }}</p>'
+						{% endif %}
+					{% endfor %}
+					html +=	'</div>'	
+					html +=	'</a></li>'		
+				{% endfor %}
+				// console.log(html);
+				divs.innerHTML = html;
+			}
+
+			window.onload = latestMsg;
+
+			// chạy khi có người dùng kết nối chat thành công và hiển thị online-offline
 			socket.on('my response connect', function (msg) {
 				console.log(msg)
 				for (let i = 0; i < msg.connect_id.length; i++) {
 					if (msg.connect_id[i] != current_user_id) {
+
 						var id = 'user_' + msg.connect_id[i];
-						document.getElementById(id).classList.remove("status", "offline") ;
-						document.getElementById(id).classList.add("status", "online") ;
+						var divs = document.getElementsByClassName(id)
+						for (let index = 0; index < divs.length; index++) {
+							divs[index].classList.remove("status", "offline") ;
+							divs[index].classList.add("status", "online") ;
+						}
+
+						var chat_id = "chat_" + msg.connect_id[i];
+						displayChatUserStatus(chat_id, "Online");
 					}
 				}
 			});
-
+			
+			// chạy khi có người dùng ngắt kết nối kênh chat, hiển thị online-offline
 			socket.on('my response disconnect', function (msg) {
 				console.log(msg);
 				var id = 'user_' + msg.disconnect_id;
-				document.getElementById(id).classList.remove("status", "online") ;
-				document.getElementById(id).classList.add("status", "offline") ;
+				if (msg.disconnect_id != current_user_id) {
+					var divs = document.getElementsByClassName(id)
+					for (let index = 0; index < divs.length; index++) {
+						divs[index].classList.remove("status", "online") ;
+						divs[index].classList.add("status", "offline") ;
+					}
+					var chat_id = "chat_" + msg.disconnect_id;
+					displayChatUserStatus(chat_id, "Offline");
+				}
 			});
 
+			// lấy id của người chat và lấy 10 tin nhắn gần đây nhẩt
 			function chatId(id) {
             current_chat_id = id
 			console.log(current_chat_id)
@@ -389,6 +324,7 @@
             	})
 			}
 			
+			//  chức năng chat 
 			function chatFunction() {
 				id = 'message_' + current_chat_id;
             	message = document.getElementById(id).value;
@@ -397,18 +333,19 @@
 				var time = currentDate.toISOString().split('T')[0]+' '+currentDate.toTimeString().split(' ')[0];
 				if (message != null && message != "") {
 						socket.emit('my event chat', {
-						message : message,
-						receiver : current_chat_id,
-						sender : current_user_id,
-						time : time,
-					});
+							message : message,
+							receiver : current_chat_id,
+							sender : current_user_id,
+							time : time,
+							type : "message",
+						});
 	
 					var displayDate = currentDate.getHours() + ":" + currentDate.getMinutes();
 					
 					var html = '';
 					html += '<li style="justify-content: flex-end; text-align: right">';
-					html += '<div class="content"><div class="message"><div class="bubble">';
-					html += '<p>' + message + '</p>';
+					html += '<div class="content"><div class="message"><div class="bubble" style="background: #007bff">';
+					html += '<p style="color: #fff;padding: 15px 20px;">' + message + '</p>';
 					html += '</div></div>'
 					html += '<span>'+ displayDate +'</span>'
 					html += '</div></li>'
@@ -417,17 +354,27 @@
 					chat = document.getElementById(chat_id).getElementsByClassName("middle")[0].getElementsByClassName("container")[0].getElementsByTagName("ul")[0];
 					// console.log(chat);
 					chat.innerHTML = chat.innerHTML + html;
+					
+					var userID = "user_" + current_chat_id;
+					var div = document.getElementById(userID).getElementsByClassName('content')[0].getElementsByTagName('p')[0]
+					html = '';
+					html += message;
+					div.innerHTML = html;
+
+					var div2 =  document.getElementById(userID).getElementsByClassName('headline')[0].getElementsByTagName('span')[0]
+					html = '';
+					html += displayDate;
+					div2.innerHTML = html;
 
 					document.getElementById(id).value = "";		
 				}	
 			}
 			
+			// hiển thị lịch sử tin nhắn
 			function displayChatHistory(chat_id, msg) {
 				const monthNames = ["Jan", "Feb", "March", "April", "May", "June","July", "Aug", "Sept", "Oct", "Nov", "Dec"];
 				// console.log(msg.length);
 				var html = '';
-				html += '<div class="container">';
-				html += '<ul>';
 				for (let index = 0; index < msg.length; index++) {
 					var JSDate = new Date(msg[index].datetime);
 					// console.log(JSDate);
@@ -441,40 +388,71 @@
 					}
 
 					if (msg[index].user_2 == current_user_id) {
-						// console.log(current_user_id);
 						html += '<li style="justify-content: flex-end; text-align: right">';
-						html += '<div class="content"><div class="message"><div class="bubble">';
-						html += '<p>' + msg[index].content + '</p>';
-						html += '</div></div>'
-						html += '<span>'+ displayDate +'</span>'
-						html += '</div></li>'
+						
+						if (msg[index].message_type == "message") {
+							html += '<div class="content"><div class="message"><div class="bubble" style="background: #007bff">';
+							html += '<p style="color: #fff;padding: 15px 20px;">' + msg[index].content + '</p>';
+							html += '</div></div>'
+							html += '<span>'+ displayDate +'</span>'
+							html += '</div></li>'
+						}
+						if (msg[index].message_type == "file") {
+							html += '<div class="content"><div class="message"><div class="bubble" style="background: #007bff">';
+							html += '<div class="attachment">';
+							html += '<div class="meta">';
+							html += '<a href="file/'+msg[index].user_2+"_"+msg[index].user_1+"/"+msg[index].content+'" onclick="Open(this); return false;"><h5 style="color: #fff" >'+ msg[index].content +'</h5></a>';
+							html += '</div></div></div></div>'
+							html += '<span>'+ displayDate +'</span>'
+							html += '</div></li>'
+						}
+						
 					}
 					else {
 						html += '<li style="justify-content: flex-start; text-align: left">';
 						{% for user in users %}
-							// console.log( msg[index].user_1 )
 							if (msg[index].user_2 == {{ user.id }}) {
 								var imgSrc = "{{ url_for('static',filename='user_image') }}/{{user.image}}"
 								html += '<img src='+ imgSrc +' alt="avatar" style="margin-right: 15px; margin-left: 0; order: 1">';
 							}
 						{% endfor %}
-						html += '<div class="content"><div class="message"><div class="bubble">';
-						html += '<p>' + msg[index].content + '</p>';
-						html += '</div></div>'
-						html += '<span>'+ displayDate +'</span>'
-						html += '</div></li>'
+											
+						if (msg[index].message_type == "message") {
+							html += '<div class="content"><div class="message"><div class="bubble" style="background: #f5f5f5">';
+							html += '<p style="color: #bdbac2;padding: 15px 20px;">' + msg[index].content + '</p>';
+							html += '</div></div>'
+							html += '<span>'+ displayDate +'</span>'
+							html += '</div></li>'
+						}
+						if (msg[index].message_type == "file") {
+							html += '<div class="content"><div class="message"><div class="bubble" style="background: #f5f5f5">';
+							html += '<div class="attachment">';
+							html += '<div class="meta">';
+							html += '<a href="index/'+msg[index].user_2+"_"+msg[index].user_1+"/"+msg[index].content+'" onclick="Open(this); return false;"><h5 style="color: #bdbac2" >'+ msg[index].content +'</h5></a>';
+							html += '</div></div></div></div>'
+							html += '<span>'+ displayDate +'</span>'
+							html += '</div></li>'
+						}
 					}	
 				}
-				html += '</ul></div>';
+				// html += '</ul></div>';
 
-				chat = document.getElementById(chat_id).getElementsByClassName("middle")[0];
+				chat = document.getElementById(chat_id).getElementsByClassName("middle")[0].getElementsByClassName("container")[0].getElementsByTagName("ul")[0];
 				// console.log(chat);
 				chat.innerHTML = html;
+			}
+
+			// hiển thị trạng thái người đang chat trên khung chat
+			function displayChatUserStatus(chat_id, status) {
+				chat = document.getElementById(chat_id).getElementsByClassName("top")[0].getElementsByClassName("headline")[0].getElementsByClassName("content")[0].getElementsByTagName("span")[0];
+				chat.innerHTML = status;
+
 			}
 
 			socket.on('my response chat', function(msg) {
             	console.log(msg);
 				if (msg.sender == current_chat_id) {
+					const monthNames = ["Jan", "Feb", "March", "April", "May", "June","July", "Aug", "Sept", "Oct", "Nov", "Dec"];
 					var JSDate = new Date(msg.time);
 					var currentDate = new Date();
 					if ((currentDate - JSDate) > 86400000) {
@@ -492,16 +470,40 @@
 							html += '<img src='+ imgSrc +' alt="avatar" style="margin-right: 15px; margin-left: 0; order: 1">';
 						}
 					{% endfor %}
-					html += '<div class="content"><div class="message"><div class="bubble">';
-					html += '<p>' + msg.message + '</p>';
-					html += '</div></div>'
-					html += '<span>'+ displayDate +'</span>'
-					html += '</div></li>'
+
+					if (msg.message_type == "message") {
+						html += '<div class="content"><div class="message"><div class="bubble" style="background: #f5f5f5">';
+						html += '<p style="color: #bdbac2;padding: 15px 20px;">' + msg.message + '</p>';
+						html += '</div></div>'
+						html += '<span>'+ displayDate +'</span>'
+						html += '</div></li>'
+					}
+					if (msg.message_type == "file") {
+						html += '<div class="content"><div class="message"><div class="bubble" style="background: #f5f5f5">';
+						html += '<div class="attachment">';
+						html += '<div class="meta">';
+						html += '<a href="index/'+current_chat_id+"_"+current_user_id+"/"+msg.message+'" onclick="Open(this); return false;"><h5 style="color: #bdbac2">'+ msg.message +'</h5></a>';
+						html += '</div></div></div></div>'
+						html += '<span>'+ displayDate +'</span>'
+						html += '</div></li>'
+					}
+					
 
 					var chat_id = "chat_" + current_chat_id;
 					chat = document.getElementById(chat_id).getElementsByClassName("middle")[0].getElementsByClassName("container")[0].getElementsByTagName("ul")[0];
 					// console.log(chat);
 					chat.innerHTML = chat.innerHTML + html;
+					
+					var userID = "user_" + current_chat_id;
+					var div = document.getElementById(userID).getElementsByClassName('content')[0].getElementsByTagName('p')[0]
+					html = '';
+					html += msg.message;
+					div.innerHTML = html;
+
+					var div2 =  document.getElementById(userID).getElementsByClassName('headline')[0].getElementsByTagName('span')[0]
+					html = '';
+					html += displayDate;
+					div2.innerHTML = html;
 				}
         	})
 
@@ -510,6 +512,121 @@
 				var chat_id = "chat_" + current_chat_id;
 				displayChatHistory(chat_id, msg);
         	})
+
+			function fileFunction() {
+				id = 'get_file_message_' + current_chat_id;
+				var div = document.getElementById(id);
+				div.click();
+			}
+
+			function uploadFileFunction() {
+				id = 'get_file_message_' + current_chat_id;
+				var div = document.getElementById(id);
+				var html = "";
+				var txt = "";
+				if ('files' in div) {
+					if (div.files.length == 0) {
+						txt = "select 1 or more file";
+					}
+					else {
+						
+						for (let index = 0; index < div.files.length; index++) {
+							var currentDate = new Date();
+							var time = currentDate.toISOString().split('T')[0]+' '+currentDate.toTimeString().split(' ')[0];
+							socket.emit('my event chat', {
+								message : div.files[index].name,
+								receiver : current_chat_id,
+								sender : current_user_id,
+								time : time,
+								type : "file",
+							});
+
+							var displayDate = currentDate.getHours() + ":" + currentDate.getMinutes();
+							var file = div.files[index];
+							// console.log(file);
+							html += '<li style="justify-content: flex-end; text-align: right">';
+							html += '<div class="content"><div class="message"><div class="bubble" style="background: #007bff">';
+							html += '<div class="attachment">';
+							html += '<div class="meta">';
+							if ('name' in file) {
+								txt = file.name;
+								html += '<a href="index/'+current_user_id+"_"+"/"+current_chat_id+txt +'" onclick="Open(this); return false;"><h5 style="color: #fff">'+ txt +'</h5></a>';
+							}
+							html += '</div></div></div></div>'
+							html += '<span>'+ displayDate +'</span>'
+							html += '</div></li>'
+
+							socket.emit('start-transfer', current_user_id, current_chat_id, div.files[index].name, div.files[index].size, function(filename) {
+								if (!filename) {
+									// the server rejected the transfer
+									onReadError.call(this, this.file, 0, 0, 'Upload rejected by server')
+								}
+								else {
+									// the server allowed the transfer with the given filename
+									this.server_filename = filename;
+									readFileChunk(div.files[index], 0, chunk_size,
+										onReadSuccess.bind(this),
+										onReadError.bind(this));
+								}
+							}.bind(div.files[index]));
+						}
+						// console.log(html);
+						var chat_id = "chat_" + current_chat_id;
+						chat = document.getElementById(chat_id).getElementsByClassName("middle")[0].getElementsByClassName("container")[0].getElementsByTagName("ul")[0];
+						chat.innerHTML = chat.innerHTML + html;
+					}
+				}
+			}
+
+		// read a chunk from a file
+		function readFileChunk(file, offset, length, success, error) {
+			end_offset = offset + length;
+			if (end_offset > file.size)
+				end_offset = file.size;
+			var r = new FileReader();
+			r.onload = function(file, offset, length, e) {
+				if (e.target.error != null)
+					error(file, offset, length, e.target.error);
+				else
+					success(file, offset, length, e.target.result);
+			}.bind(r, file, offset, length);
+			r.readAsArrayBuffer(file.slice(offset, end_offset));
+		}
+
+		// read success callback
+		function onReadSuccess(file, offset, length, data) {
+			if (this.done)
+				return;
+			if (!socket.connected) {
+				// the WebSocket connection was lost, wait until it comes back
+				setTimeout(onReadSuccess.bind(this, file, offset, length, data), 5000);
+				return;
+			}
+			socket.emit('write-chunk', current_user_id, current_chat_id, this.server_filename, offset, data, function(offset, ack) {
+				if (!ack)
+					onReadError(this.file, offset, 0, 'Transfer aborted by server')
+			}.bind(this, offset));
+			end_offset = offset + length;
+			// this.progress.style.width = parseInt(300 * end_offset / file.size) + "px";
+			if (end_offset < file.size)
+				readFileChunk(file, end_offset, chunk_size,
+					onReadSuccess.bind(this),
+					onReadError.bind(this));
+			else {
+				console.log("Upload file done");                        
+			}
+		}
+
+		// read error callback
+		function onReadError(file, offset, length, error) {
+			console.log('Upload error for ' + file.name + ': ' + error);
+		}
+
+		function Open(obj) {
+			console.log(obj.getAttribute("href"))
+			fileURL = obj.getAttribute("href")
+			window.open(fileURL, '_blank');
+		}
 		</script>
 	</body>
 </html>																																																										
